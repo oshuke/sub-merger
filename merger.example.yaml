@@ -1,0 +1,61 @@
+# sub-merger 示例配置：复制成 merger.yaml 后改成自己的订阅
+# 完整说明见 README.md
+
+network:
+  # 拉订阅时走的代理。本机 FlClash 在跑就填 http://127.0.0.1:7890，直连留空 ""
+  proxy: "http://127.0.0.1:7890"
+  timeout: 30
+  user_agent: "clash.meta/1.19.0"
+
+output:
+  path: ""                      # 留空=下载/订阅导出/merged.yaml；也可写绝对路径
+  group_entry: PROXY           # 主入口组，规则里指向“节点选择”之类都会被改到这里
+  group_auto: 自动选择          # url-test 组：全部节点里自动挑最快
+  group_manual: 手动选择        # select 组：手动挑
+  rule_mode: primary           # primary=只留主订阅的规则；union=把各家规则拼起来
+  dedupe: server               # server=同一服务器+端口+密码算重复；name=按节点名去重
+  include_dns: false           # 想用订阅里的 DNS 配置就设 true
+  tun_stack: system            # tun 栈：system / gvisor / mixed（构建不带 gVisor 时只能用 system）
+  clash: true                  # 导出 Clash YAML（merged.yaml，给 FlClash）
+  singbox: true                # 导出 sing-box 配置（merged-singbox.json）
+  v2ray: false                 # 导出 V2Ray base64 订阅（merged-v2ray.txt）
+  singbox_path: ""             # 留空=与 path 同目录
+  v2ray_path: ""               # 留空=与 path 同目录
+  url_test:
+    url: https://www.gstatic.com/generate_204
+    interval: 300              # 测速间隔（秒）
+    tolerance: 50              # 迟滞（毫秒），防抖
+
+subscriptions:
+  # 每家一个条目；name 只用于前缀和日志，不能重复
+  - name: A
+    url: "https://example.com/api/v1/client/subscribe?token=AAAA"
+    primary: true              # 规则以它为准（rule_mode: primary 时生效）
+    # 只留美区；留空 "" 就是全留
+    filter: '(?i)(美国|🇺🇸|United\s?States|\bUSA?\b|US[-_]?\d|洛杉矶|Los\s?Angeles|圣何塞|San\s?Jose|西雅图|Seattle|纽约|New\s?York|达拉斯|Dallas|硅谷|Silicon\s?Valley|凤凰城|Phoenix|阿什本|Ashburn|迈阿密|Miami|芝加哥|Chicago)'
+    exclude: ''                # 额外剔除，例：'(?i)(到期|剩余流量|官网|群组)'
+
+  - name: B
+    url: "https://example.com/api/v1/client/subscribe?token=BBBB"
+    filter: '(?i)(美国|🇺🇸|United\s?States|\bUSA?\b|US[-_]?\d|洛杉矶|Los\s?Angeles|圣何塞|San\s?Jose|西雅图|Seattle|纽约|New\s?York|达拉斯|Dallas|硅谷|Silicon\s?Valley|凤凰城|Phoenix|阿什本|Ashburn|迈阿密|Miami|芝加哥|Chicago)'
+
+  # 本地文件也行（命令行可用；图形界面只收 http/https 链接），此时不要写 url
+  # - name: C
+  #   path: D:/subs/c.yaml
+
+# 手动筛选的第二层（第一层是上面的 filter）。文件放配置同目录，可用 * 通配，
+# 也可用 "A::节点名" 限定某家；--pick 挑选结果会写进 keep 文件。
+keep_file: keep.txt
+drop_file: drop.txt
+
+# 缓存目录（--offline 时读这里），默认 .cache
+cache_dir: .cache
+
+# --serve 的缓存有效期（秒），到期后下次请求重新拉订阅
+refresh_seconds: 1800
+
+# 全局兜底（订阅条目没写 filter/exclude 时用这里）
+defaults:
+  filter: ''
+  exclude: ''
+  drop_info_nodes: false       # true=丢掉“剩余流量/套餐到期”这类节点（有的机场把它做成真节点，默认不丢）

@@ -1,0 +1,29 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  selftest:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install deps
+        run: python -m pip install --upgrade pip pyyaml
+      - name: Compile check
+        run: python -m py_compile merger.py singbox.py v2ray.py gui.py
+      - name: Selftest
+        run: python tests/selftest.py
+      - name: CLI smoke (fixtures)
+        run: |
+          python merger.py -c tests/merger.test.yaml -o dist/merged.yaml
+          test -s dist/merged.yaml
+          test -s dist/merged-singbox.json

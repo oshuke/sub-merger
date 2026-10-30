@@ -1,0 +1,19 @@
+# 本地配置与产物（含订阅地址/token，绝不入库）
+merger.yaml
+merger.yaml.bak
+merged.yaml
+merged-*.json
+merged-*.txt
+merged-report.md
+
+# 缓存与临时文件
+.cache/
+__pycache__/
+*.pyc
+*.pyo
+tests/.tmp-*
+tests/tmp*
+tests/tests/
+*.tmp
+gui.log
+dist/

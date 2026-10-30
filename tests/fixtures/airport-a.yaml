@@ -1,0 +1,43 @@
+# 模拟机场 A 的 Clash 订阅（测试用，节点均为假数据）
+mixed-port: 7890
+allow-lan: false
+mode: rule
+log-level: info
+dns:
+  enable: true
+  nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+
+proxies:
+  - {name: "香港 01", type: ss, server: hk1.a-air.example, port: 443, cipher: aes-128-gcm, password: pa-hk1}
+  - {name: "🇺🇸 洛杉矶 01", type: vmess, server: la1.a-air.example, port: 443, uuid: 11111111-1111-1111-1111-111111111111, alterId: 0, cipher: auto, tls: true, servername: la1.a-air.example}
+  - {name: "🇺🇸 圣何塞 IEPL", type: trojan, server: sj1.a-air.example, port: 443, password: pa-sj1, sni: sj1.a-air.example}
+  - {name: "🇺🇸 洛杉矶 01", type: ss, server: la2.a-air.example, port: 8443, cipher: aes-256-gcm, password: pa-la2}
+  - {name: "🇯🇵 东京 01", type: ss, server: tk1.a-air.example, port: 443, cipher: aes-128-gcm, password: pa-tk1}
+  - {name: "🇸🇬 新加坡 01", type: vmess, server: sg1.a-air.example, port: 443, uuid: 22222222-2222-2222-2222-222222222222, alterId: 0, cipher: auto}
+  - {name: "AUS-悉尼 01", type: ss, server: sy1.a-air.example, port: 443, cipher: aes-128-gcm, password: pa-sy1}
+  - {name: "俄罗斯 RU-01", type: ss, server: ru1.a-air.example, port: 443, cipher: aes-128-gcm, password: pa-ru1}
+
+proxy-groups:
+  - {name: "节点选择", type: select, proxies: ["自动选择", "手动选择", "DIRECT"]}
+  - {name: "自动选择", type: url-test, url: "http://www.gstatic.com/generate_204", interval: 300, proxies: ["香港 01", "🇺🇸 洛杉矶 01", "🇺🇸 圣何塞 IEPL", "🇯🇵 东京 01", "🇸🇬 新加坡 01", "AUS-悉尼 01", "俄罗斯 RU-01"]}
+  - {name: "手动选择", type: select, proxies: ["香港 01", "🇺🇸 洛杉矶 01", "🇺🇸 圣何塞 IEPL", "🇯🇵 东京 01", "🇸🇬 新加坡 01", "AUS-悉尼 01", "俄罗斯 RU-01", "DIRECT"]}
+  - {name: "流媒体", type: select, proxies: ["🇺🇸 洛杉矶 01", "🇺🇸 圣何塞 IEPL", "节点选择"]}
+
+rule-providers:
+  Apple:
+    type: http
+    behavior: domain
+    url: "https://example.invalid/apple.yaml"
+    path: ./ruleset/apple.yaml
+    interval: 86400
+
+rules:
+  - DOMAIN-SUFFIX,netflix.com,流媒体
+  - RULE-SET,Apple,DIRECT
+  - DOMAIN-SUFFIX,openai.com,节点选择
+  - GEOIP,CN,DIRECT
+  - AND,((NETWORK,tcp),(DOMAIN-SUFFIX,anthropic.com)),节点选择
+  - IP-CIDR,1.2.3.4/32,DIRECT,no-resolve
+  - MATCH,节点选择

@@ -1,0 +1,34 @@
+# 模拟机场 B 的 Clash 订阅（测试用，节点均为假数据）
+mixed-port: 7890
+mode: rule
+log-level: warning
+
+proxies:
+  - {name: "香港 01", type: ss, server: hk1.b-air.example, port: 443, cipher: aes-128-gcm, password: pb-hk1}
+  - {name: "🇺🇸 达拉斯 01", type: ss, server: dal.b-air.example, port: 443, cipher: aes-256-gcm, password: pb-dal}
+  - {name: "🇺🇸 纽约 CN2", type: hysteria2, server: ny.b-air.example, port: 443, password: pb-ny, sni: ny.b-air.example}
+  - {name: "🇺🇸 阿什本", type: ss, server: ash.b-air.example, port: 8443, cipher: aes-128-gcm, password: pb-ash}
+  - {name: "🇺🇸 圣何塞 IEPL(备用)", type: trojan, server: sj1.a-air.example, port: 443, password: pa-sj1, sni: sj1.a-air.example}
+  - {name: "🇯🇵 大阪 01", type: vmess, server: osa.b-air.example, port: 443, uuid: 33333333-3333-3333-3333-333333333333, alterId: 0, cipher: auto}
+  - {name: "🇺🇸 洛杉矶 01", type: vmess, server: la.b-air.example, port: 443, uuid: 44444444-4444-4444-4444-444444444444, alterId: 0, cipher: auto, tls: true}
+
+proxy-groups:
+  - {name: "节点选择", type: select, proxies: ["自动选择", "手动选择"]}
+  - {name: "自动选择", type: url-test, url: "http://www.gstatic.com/generate_204", interval: 600, proxies: ["香港 01", "🇺🇸 达拉斯 01", "🇺🇸 纽约 CN2", "🇺🇸 阿什本", "🇯🇵 大阪 01", "🇺🇸 洛杉矶 01"]}
+  - {name: "手动选择", type: select, proxies: ["香港 01", "🇺🇸 达拉斯 01", "🇺🇸 纽约 CN2", "🇺🇸 阿什本", "🇯🇵 大阪 01", "🇺🇸 洛杉矶 01"]}
+  - {name: "流媒体", type: select, proxies: ["🇺🇸 纽约 CN2", "🇺🇸 达拉斯 01"]}
+
+rule-providers:
+  Apple:
+    type: http
+    behavior: domain
+    url: "https://example.invalid/b-apple.yaml"
+    path: ./ruleset/b-apple.yaml
+    interval: 86400
+
+rules:
+  - DOMAIN-SUFFIX,youtube.com,流媒体
+  - RULE-SET,Apple,直连
+  - DOMAIN-KEYWORD,广告,REJECT
+  - GEOIP,CN,直连
+  - MATCH,PROXY

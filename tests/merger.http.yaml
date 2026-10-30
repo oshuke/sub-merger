@@ -1,0 +1,18 @@
+# 走真实 HTTP 的测试：本地 http.server 提供两份假订阅
+network:
+  proxy: ""
+  timeout: 10
+
+subscriptions:
+  - name: A
+    url: "http://127.0.0.1:8899/airport-a.yaml"
+    primary: true
+    filter: '(?i)(美国|🇺🇸|\bUSA?\b|US[-_]?\d|洛杉矶|圣何塞|纽约|达拉斯|阿什本)'
+
+  - name: B
+    url: "http://127.0.0.1:8899/airport-b.yaml"
+    filter: '(?i)(美国|🇺🇸|\bUSA?\b|US[-_]?\d|洛杉矶|圣何塞|纽约|达拉斯|阿什本)'
+
+cache_dir: .cache-http
+output:
+  path: out/http.yaml
