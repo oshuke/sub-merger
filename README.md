@@ -1,5 +1,9 @@
 # sub-merger — 多机场订阅合并器（Clash / sing-box / V2Ray）
 
+[![tests](https://github.com/oshuke/sub-merger/actions/workflows/tests.yml/badge.svg)](https://github.com/oshuke/sub-merger/actions/workflows/tests.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
+
 把多个机场订阅合成**一份**配置：节点池合并、只保留你要的地区、策略组精简成三个，再按需导出成 Clash、sing-box 或 V2Ray 订阅。
 
 - 输入：若干 Clash 订阅链接（命令行也支持本地 yaml）
